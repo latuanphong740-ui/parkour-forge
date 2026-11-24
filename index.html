@@ -154,6 +154,11 @@
         <kbd class="hidden lg:inline-block text-[10px] font-mono px-1 py-0.2 rounded bg-slate-900 text-slate-400 border border-slate-700">R</kbd>
       </button>
 
+      <button id="btn-toggle-audio" type="button" title="Toggle Sound Effects" class="px-2.5 py-1.5 rounded-lg bg-surface hover:bg-slate-700/70 active:scale-95 border border-slate-700/80 text-xs font-semibold text-emerald-300 transition flex items-center gap-1">
+        <span id="audio-icon">🔊</span>
+	<span class="hidden sm:inline">SFX</span>
+      </button>
+
       <button id="btn-toggle-drawer" type="button" title="Toggle Level & Game Tuner (E)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 border border-sky-500/40 text-xs font-semibold text-sky-300 transition flex items-center gap-1.5 shadow-sm">
         <span>⚙ Tuner &amp; Editor</span>
         <kbd class="hidden lg:inline-block text-[10px] font-mono px-1 py-0.2 rounded bg-slate-950 text-sky-400 border border-sky-500/30">E</kbd>
@@ -1469,6 +1474,7 @@
           onWall: 0,
           facing: 1,
           checkpoint: null,
+	  activeCheckpointKey: null,
           activatedCheckpoints: new Set(),
           squashX: 1,
           squashY: 1,
@@ -1634,6 +1640,90 @@
       };
 
       const ctx = dom.canvas.getContext('2d');
+
+      const SoundFX = (() => {
+	let audioCtx = null;
+	let muted = false;
+
+	function ensureCtx() {
+	  if (muted) return null;
+	  if (!audioCtx) {
+	    const Ctx = window.AudioContext || window.webkitAudioContext;
+	    if (Ctx) audioCtx = new Ctx();
+	  }
+	  if (audioCtx && audioCtx.state === 'suspended') {
+	    audioCtx.resume().catch(() => {});
+	  }
+	  return audioCtx;
+	}
+
+	function tone({ freqStart, freqEnd, duration, type = 'sine', gainPeak = 0.14, delay = 0 }) {
+	  const ac = ensureCtx();
+	  if (!ac) return;
+	  const now = ac.currentTime + delay;
+	  const osc = ac.createOscillator();
+	  const gain = ac.createGain();
+	  osc.type = type;
+	  osc.frequency.setValueAtTime(freqStart, now);
+	  if (freqEnd) {
+	    osc.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd), now + duration);
+	  }
+	  gain.gain.setValueAtTime(0.0001, now);
+	  gain.gain.linearRampToValueAtTime(gainPeak, now + 0.012);
+	  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+	  osc.connect(gain);
+	  gain.connect(ac.destination);
+	  osc.start(now);
+	  osc.stop(now + duration + 0.02);
+	}
+
+	return {
+	  setMuted(val) {
+	    muted = Boolean(val);
+	  },
+	  isMuted() {
+	    return muted;
+	  },
+	  jump() {
+	    tone({ freqStart: 220, freqEnd: 520, duration: 0.13, type: 'triangle', gainPeak: 0.14 });
+	  },
+	  wallJump() {
+	    tone({ freqStart: 280, freqEnd: 640, duration: 0.14, type: 'square', gainPeak: 0.09 });
+	  },
+	  bounce() {
+	    tone({ freqStart: 190, freqEnd: 780, duration: 0.22, type: 'sine', gainPeak: 0.18 });
+	  },
+	  key() {
+	    tone({ freqStart: 660, freqEnd: 880, duration: 0.09, type: 'sine', gainPeak: 0.14, delay: 0 });
+	    tone({ freqStart: 880, freqEnd: 1180, duration: 0.14, type: 'sine', gainPeak: 0.14, delay: 0.07 });
+	  },
+	  portal() {
+	    tone({ freqStart: 760, freqEnd: 260, duration: 0.2, type: 'sawtooth', gainPeak: 0.09 });
+	  },
+	  checkpoint() {
+	    tone({ freqStart: 523.25, freqEnd: 523.25, duration: 0.09, type: 'triangle', gainPeak: 0.13, delay: 0 });
+	    tone({ freqStart: 659.25, freqEnd: 783.99, duration: 0.16, type: 'triangle', gainPeak: 0.14, delay: 0.08 });
+	  },
+	  death() {
+	    tone({ freqStart: 260, freqEnd: 75, duration: 0.26, type: 'sawtooth', gainPeak: 0.14 });
+	  },
+	  win() {
+	    const notes = [523.25, 659.25, 783.99, 1046.5];
+	    notes.forEach((n, idx) => {
+ 	      tone({ freqStart: n, freqEnd: n * 1.02, duration: 0.16, type: 'triangle', gainPeak: 0.14, delay: idx * 0.08 });
+	    });
+	  },
+	  click() {
+	    tone({ freqStart: 620, freqEnd: 480, duration: 0.045, type: 'triangle', gainPeak: 0.07, delay: 0 });
+	  },
+	  placeNode() {
+	    tone({ freqStart: 380, freqEnd: 680, duration: 0.07, type: 'sine', gainPeak: 0.1, delay: 0 });
+	  },
+	  removeNode() {
+	    tone({ freqStart: 420, freqEnd: 210, duration: 0.08, type: 'triangle', gainPeak: 0.09, delay: 0 });
+	  },
+	};
+      })();
 
       function showToast(message, tone = 'info') {
         const el = document.createElement('div');
@@ -1830,7 +1920,8 @@
 
         if (fullLevelReset) {
           p.checkpoint = null;
-          p.activatedCheckpoints.clear();
+          p.activeCheckpointKey = null;
+	  p.activatedCheckpoints.clear();
           state.collectedKeyCells.clear();
           state.keysCollected = 0;
           state.unlockedDoors = false;
@@ -2144,6 +2235,7 @@
       function handleLevelGoalReached() {
         if (state.levelComplete) return;
         state.levelComplete = true;
+	SoundFX.win();
         const level = getCurrentLevel();
         spawnParticles(
           state.player.x + state.player.w * 0.5,
@@ -2473,6 +2565,7 @@
 
         if (!state.levelComplete && state.jumpBufferTimerMs > 0) {
           if (state.coyoteTimerMs > 0) {
+	    SoundFX.jump();
             p.vy = -phys.jumpForce;
             p.onGround = false;
             state.coyoteTimerMs = 0;
@@ -2481,6 +2574,7 @@
             p.squashY = 1.28;
             spawnParticles(p.x + p.w * 0.5, p.y + p.h, '#38bdf8', 9, 30, 140, 0.2, 0.42);
           } else if (p.onWall !== 0 || state.wallCoyoteTimerMs > 0) {
+	    SoundFX.wallJump();
             const wallSide = p.onWall !== 0 ? p.onWall : state.lastGroundedWallDir;
             const kickDir = -wallSide;
             p.vy = -phys.wallJumpForce;
@@ -2642,6 +2736,7 @@
                 h: TILE_SIZE * 0.42,
               };
               if (rectsOverlap(p, padBox) && p.vy >= -80) {
+	        SoundFX.bounce();
                 p.y = padBox.y - p.h;
                 p.vy = -Math.max(BOUNCE_VELOCITY, phys.jumpForce * 1.42);
                 p.onGround = false;
@@ -2659,6 +2754,7 @@
               };
               const kId = `${c},${r}`;
               if (!state.collectedKeyCells.has(kId) && rectsOverlap(p, keyBox)) {
+	        SoundFX.key();
                 state.collectedKeyCells.add(kId);
                 state.keysCollected += 1;
                 state.unlockedDoors = true;
@@ -2686,6 +2782,7 @@
                   }
                 }
                 if (portals.length > 0) {
+	          SoundFX.portal();
                   const dest = portals[0];
                   spawnParticles(p.x + p.w * 0.5, p.y + p.h * 0.5, '#e879f9', 16, 50, 220, 0.2, 0.5);
                   p.x = dest.x;
@@ -2714,8 +2811,9 @@
                 h: TILE_SIZE - 4,
               };
               const key = `${c},${r}`;
-              if (rectsOverlap(p, cpBox) && !p.activatedCheckpoints.has(key)) {
-                p.activatedCheckpoints.add(key);
+              if (rectsOverlap(p, cpBox) && p.activeCheckpointKey !== key) {
+	        SoundFX.checkpoint();
+                p.activeCheckpointKey = key;
                 p.checkpoint = {
                   x: tx + (TILE_SIZE - p.w) * 0.5,
                   y: ty + TILE_SIZE - p.h,
@@ -2730,7 +2828,7 @@
                 w: TILE_SIZE - 12,
                 h: TILE_SIZE - 4,
               };
-              if (rectsOverlap(p, goalBox)) {
+              if (!state.levelComplete && rectsOverlap(p, goalBox)) {
                 handleLevelGoalReached();
                 return;
               }
@@ -2742,6 +2840,7 @@
           const seg = getLaserSegment(laser, state.worldTime, level);
           if (seg.active && segmentIntersectsRect(seg.startX, seg.startY, seg.endX, seg.endY, p)) {
             handlePlayerDeath();
+	    SoundFX.death();
             return;
           }
         }
@@ -3057,9 +3156,10 @@
                 ctx.fillStyle = '#fb7185';
                 ctx.fill();
               }
-            } else if (tile === TILE.CHECKPOINT) {
+
+	    } else if (tile === TILE.CHECKPOINT) {
               const cpKey = `${c},${r}`;
-              const active = state.player.activatedCheckpoints.has(cpKey);
+              const active = state.player.activeCheckpointKey === cpKey;
               ctx.fillStyle = '#94a3b8';
               ctx.fillRect(tx + 10, ty + 6, 3, TILE_SIZE - 6);
               const wave = Math.sin(state.worldTime * 6 + c) * 2.5;
@@ -3070,6 +3170,7 @@
               ctx.closePath();
               ctx.fillStyle = active ? '#fbbf24' : '#475569';
               ctx.fill();
+
             } else if (tile === TILE.GOAL) {
               const pulse = 0.85 + Math.sin(state.worldTime * 4.5) * 0.15;
               ctx.save();
@@ -3505,6 +3606,7 @@
 
       function handlePlayerDeath() {
         if (state.mode !== 'play' || state.levelComplete) return;
+        SoundFX.death();
         state.deaths += 1;
         dom.hudDeaths.textContent = String(state.deaths);
         state.camera.shake = 9;
@@ -4574,6 +4676,14 @@
           if (document.hidden) resetHeldKeys();
         });
 
+
+        document.addEventListener('pointerdown', (e) => {
+          const btn = e.target.closest('button, [role="button"]');
+          if (!btn || btn.disabled) return;
+          if (btn.id === 'btnToggleSound' || btn.id === 'muteBtn') return;
+          SoundFX.click();
+        });
+
 	document.addEventListener('pointerdown', (e) => {
 	  if (state.mode !== 'edit') return;
 	  const hasSelection =
@@ -4653,6 +4763,20 @@
           respawnPlayer(true);
           showToast('Course restarted', 'info');
         });
+
+	const btnAudio = document.getElementById('btn-toggle-audio');
+        const audioIcon = document.getElementById('audio-icon');
+        if (btnAudio) {
+          btnAudio.addEventListener('click', () => {
+            const nextMuted = !SoundFX.isMuted();
+            SoundFX.setMuted(nextMuted);
+            if (audioIcon) audioIcon.textContent = nextMuted ? '🔇' : '🔊';
+            btnAudio.classList.toggle('text-emerald-300', !nextMuted);
+            btnAudio.classList.toggle('text-slate-400', nextMuted);
+            if (!nextMuted) SoundFX.checkpoint();
+          });
+        }
+
         dom.btnToggleDrawer.addEventListener('click', () => setDrawerOpen(!state.drawerOpen));
         dom.btnCloseDrawer.addEventListener('click', () => setDrawerOpen(false));
         if (dom.btnUndo) dom.btnUndo.addEventListener('click', undoEdit);
