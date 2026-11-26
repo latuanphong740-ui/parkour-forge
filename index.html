@@ -301,7 +301,7 @@
         </div>
 
         <!-- Đã tách riêng quick-label-controls ra khỏi quick-laser-controls -->
-        <div id="quick-label-controls" class="hidden flex flex-wrap items-center gap-2.5">
+	<div id="quick-label-controls" class="hidden flex flex-wrap items-center gap-2.5">
           <label class="flex items-center gap-1.5 text-slate-300">
             <span>Message:</span>
             <input id="quick-lbl-text" type="text" maxlength="120" placeholder="Enter the message to be displayed..." class="w-48 sm:w-64 px-2 py-1 rounded bg-canvas border border-amber-400/60 text-white focus:outline-none focus:border-amber-300" />
@@ -316,11 +316,23 @@
           </label>
         </div>
 
+        <div id="quick-ball-controls" class="hidden flex flex-wrap items-center gap-2.5">
+          <label class="flex items-center gap-1.5 text-slate-300">
+            <span>Mass:</span>
+            <input id="quick-ball-mass" type="number" min="0.4" max="8" step="0.1" value="1.5" class="w-16 px-1.5 py-0.5 rounded bg-canvas border border-slate-700 font-mono text-amber-300" />
+          </label>
+          <label class="flex items-center gap-1.5 text-slate-300">
+            <span>Bounce:</span>
+            <input id="quick-ball-bounce" type="range" min="0.1" max="0.95" step="0.01" value="0.68" class="w-24 parkour-slider" />
+            <span id="quick-ball-bounce-val" class="font-mono text-sky-300 w-10">0.68</span>
+          </label>
+        </div>
+
         <span class="text-[11px] text-slate-400 font-mono hidden sm:inline">Drag directly to move</span>
       </div>
 
       <!-- Debug / FPS & Hitbox Overlay -->
-      <div id="debug-overlay" class="hidden pointer-events-none fixed sm:absolute top-14 sm:top-16 left-2 sm:left-3 z-10 font-mono text-[9.5px] leading-[1.12] text-white" style="text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 2px #000;">
+      <div id="debug-overlay" class="hidden pointer-events-none absolute top-2 left-2 sm:top-3 sm:left-3 z-10 font-mono text-[9.5px] leading-[1.12] text-white" style="text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 2px #000;">
         <div class="flex items-center gap-2 mb-0.5">
           <span id="dbg-fps" class="font-semibold">60 FPS</span>
         </div>
@@ -331,7 +343,7 @@
         <div class="flex gap-1.5"><span>C/B:</span><span id="dbg-timers">0ms / 0ms</span></div>
         <div class="flex gap-1.5"><span>Cam:</span><span id="dbg-cam">Follow · 1.00x</span></div>
       </div>
-	<!-- Level Complete Overlay -->
+      	<!-- Level Complete Overlay -->
       <div id="level-complete-banner" class="hidden absolute inset-0 z-10 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-hidden">
         <canvas id="victory-fireworks-canvas" class="pointer-events-none absolute inset-0 w-full h-full z-0"></canvas>
         <div class="relative z-10 bg-panel/95 border border-emerald-500/40 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl">
@@ -574,14 +586,11 @@
             <p class="text-[11px] text-slate-400 leading-snug">
               Select a tile, Spawn, Mover, Ball, Spinner, Laser, or Label (click/drag area/hold Shift) and then drag the mouse to move it.
             </p>
-            <div class="grid grid-cols-3 gap-1.5">
-              <button id="btn-group-selected" type="button" class="py-1.5 px-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 text-xs font-semibold transition">
+            <div class="grid grid-cols-2 gap-2">
+              <button id="btn-group-selected" type="button" class="w-full py-1.5 px-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 text-xs font-semibold transition">
                 + Group
               </button>
-              <button id="btn-clear-selection" type="button" class="py-1.5 px-2 rounded-lg bg-canvas hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-300 transition">
-                Clear Select
-              </button>
-	      <button id="btn-delete-group" type="button" class="py-1.5 px-2 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/50 text-rose-200 text-xs font-semibold transition">
+	      <button id="btn-delete-group" type="button" class="w-full py-1.5 px-2 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/50 text-rose-200 text-xs font-semibold transition">
 		Del Group
 	      </button>
             </div>
@@ -619,43 +628,42 @@
               </div>
             </div>
           </div>
-
-          <div id="mover-inspector" class="bg-surface/70 border border-slate-800 rounded-xl p-3 space-y-2.5">
+	  <div id="mover-inspector" class="bg-surface/70 border border-slate-800 rounded-xl p-3 space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-xs font-semibold text-sky-300">Mover / Ball / Trap Inspector</span>
-              <span class="text-[10px] font-mono text-slate-400">Click node in Edit</span>
+              <span class="text-[10px] font-mono text-slate-400">Auto-update in Edit</span>
             </div>
             <p id="mover-selected-info" class="text-[11px] text-slate-400 font-mono">No moving platform or physics node selected.</p>
             <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label id="lbl-mover-axis" for="mover-axis" class="block text-[11px] text-slate-400 mb-1">Axis / Dir</label>
-                <select id="mover-axis" class="w-full px-2 py-1 rounded-lg bg-canvas border border-slate-700 text-xs text-white">
-                  <option value="x">Horizontal (X) / Forward rotation (CW)</option>
-                  <option value="y">Vertical (Y) / Reverse Rotation (CCW)</option>
-                </select>
-              </div>
-              <div>
-                <label id="lbl-mover-range" for="mover-range" class="block text-[11px] text-slate-400 mb-1">Travel / Size / Len</label>
-                <input id="mover-range" type="number" min="-100" max="100" step="0.1" value="2.5" class="w-full px-2 py-1 rounded-lg bg-canvas border border-slate-700 text-xs font-mono text-white" />
-              </div>
-              <div>
-                <label for="mover-offset-x" class="block text-[11px] text-slate-400 mb-1">Offset X (px)</label>
-                <input id="mover-offset-x" type="number" min="-400" max="400" step="2" value="0" class="w-full px-2 py-1 rounded-lg bg-canvas border border-slate-700 text-xs font-mono text-white" />
-              </div>
-              <div>
-                <label for="mover-offset-y" class="block text-[11px] text-slate-400 mb-1">Offset Y (px)</label>
-                <input id="mover-offset-y" type="number" min="-400" max="400" step="2" value="0" class="w-full px-2 py-1 rounded-lg bg-canvas border border-slate-700 text-xs font-mono text-white" />
-              </div>
-              <div>
-                <label id="lbl-mover-speed" for="mover-speed" class="block text-[11px] text-slate-400 mb-1">Speed</label>
-                <input id="mover-speed" type="number" min="0.1" max="15" step="0.2" value="1.6" class="w-full px-2 py-1 rounded-lg bg-canvas border border-slate-700 text-xs font-mono text-white" />
-              </div>
-              <div class="flex items-end">
-                <button id="btn-apply-mover" type="button" class="w-full py-1 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold transition">
-                  Update Node
-                </button>
-              </div>
-            </div>
+        <div id="mover-axis-dir-box" class="flex flex-col min-w-0">
+          <span id="lbl-mover-axis" class="block text-[11px] text-slate-400 mb-1 truncate">Axis / Dir</span>
+          <input id="mover-axis" type="hidden" value="x" />
+          <div class="grid grid-cols-2 gap-1.5 w-full">
+            <button id="mover-dir-x" type="button" data-axis-val="x" class="mover-axis-choice w-full min-w-0 h-[26px] px-2 rounded-lg bg-sky-500/25 border border-sky-400 text-sky-200 text-xs font-semibold transition flex items-center justify-center truncate" title="Horizontal (X) / Forward rotation (CW)">
+              ↔ X
+            </button>
+            <button id="mover-dir-y" type="button" data-axis-val="y" class="mover-axis-choice w-full min-w-0 h-[26px] px-2 rounded-lg bg-canvas border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-semibold transition flex items-center justify-center truncate" title="Vertical (Y) / Reverse rotation (CCW)">
+              ↕ Y
+                  </button>
+          </div>
+        </div>
+        <div class="min-w-0">
+          <label for="mover-offset-x" class="block text-[11px] text-slate-400 mb-1 truncate">Offset X (px)</label>
+          <input id="mover-offset-x" type="number" min="-400" max="400" step="2" value="0" class="w-full min-w-0 h-[26px] px-2 rounded-lg bg-canvas border border-slate-700 text-xs font-mono text-white" />
+        </div>
+        <div class="min-w-0">
+          <label for="mover-offset-y" class="block text-[11px] text-slate-400 mb-1 truncate">Offset Y (px)</label>
+          <input id="mover-offset-y" type="number" min="-400" max="400" step="2" value="0" class="w-full min-w-0 h-[26px] px-2 rounded-lg bg-canvas border border-slate-700 text-xs font-mono text-white" />
+        </div>
+        <div id="mover-speed-wrap" class="min-w-0">
+          <label id="lbl-mover-speed" for="mover-speed" class="block text-[11px] text-slate-400 mb-1 truncate">Speed</label>
+          <input id="mover-speed" type="number" min="0.1" max="15" step="0.2" value="1.6" class="w-full min-w-0 h-[26px] px-2 rounded-lg bg-canvas border border-slate-700 text-xs font-mono text-white" />
+        </div>
+        <div id="mover-range-wrap" class="col-span-2 min-w-0">
+          <label id="lbl-mover-range" for="mover-range" class="block text-[11px] text-slate-400 mb-1 truncate">Travel (Tiles) / Size / Len</label>
+          <input id="mover-range" type="number" min="-100" max="100" step="0.1" value="2.5" class="w-full min-w-0 h-[26px] px-2 rounded-lg bg-canvas border border-slate-700 text-xs font-mono text-white" />
+        </div>
+      </div>
           </div>
         </section>
 
@@ -1531,6 +1539,10 @@
         btnRedo: document.getElementById('btn-redo'),
         nodeQuickBar: document.getElementById('node-quick-bar'),
 	quickLsOn: document.getElementById('quick-ls-on'),
+	quickBallControls: document.getElementById('quick-ball-controls'),
+	quickBallMass: document.getElementById('quick-ball-mass'),
+	quickBallBounce: document.getElementById('quick-ball-bounce'),
+	quickBallBounceVal: document.getElementById('quick-ball-bounce-val'),
 	quickLsWait: document.getElementById('quick-ls-wait'),
 	quickLsPermanent: document.getElementById('quick-ls-permanent'),
         quickNodeTitle: document.getElementById('quick-node-title'),
@@ -1848,7 +1860,6 @@
         state.selectedSpawn = false;
         syncUI();
         saveToLocalStorage();
-        showToast('Undid last level change', 'info');
       }
 
       function redoEdit() {
@@ -1870,7 +1881,6 @@
         state.selectedSpawn = false;
         syncUI();
         saveToLocalStorage();
-        showToast('Redid level change', 'info');
       }
 
       function updateUndoRedoButtons() {
@@ -2351,73 +2361,182 @@
         const worldW = level.cols * TILE_SIZE;
         const worldH = level.rows * TILE_SIZE;
 
+        const getBallColliders = (b, bx, by) => {
+          const box = { x: bx - b.radius, y: by - b.radius, w: b.radius * 2, h: b.radius * 2 };
+          return [...getSolidRectsNearPlayer(level, box), ...moverRects];
+        };
+
+        const ballHitsWorld = (b, bx, by) => {
+          if (bx - b.radius < 0 || bx + b.radius > worldW) return true;
+          const cBox = { x: bx - b.radius, y: by - b.radius, w: b.radius * 2, h: b.radius * 2 };
+          for (const wall of getBallColliders(b, bx, by)) {
+            if (rectsOverlap(cBox, wall)) return true;
+          }
+          return false;
+        };
+
+        const playerHitsSolid = (px, py) => {
+          if (px < 0 || px + p.w > worldW) return true;
+          const pBox = { x: px, y: py, w: p.w, h: p.h };
+          for (const wall of getSolidRectsNearPlayer(level, pBox)) {
+            if (rectsOverlap(pBox, wall)) return true;
+          }
+          return false;
+        };
+
         for (const b of state.ballRuntime) {
-          const gOff = getGroupMotionOffset(level, (level.balls || []).find((item) => item.id === b.id)?.groupId, state.worldTime);
-          b.x += gOff.dx - gOff.prevDx;
-          b.y += gOff.dy - gOff.prevDy;
+          const cfg = (level.balls || []).find((item) => item.id === b.id);
+          const rest = Math.max(0.1, Math.min(0.95, Number(b.restitution ?? cfg?.restitution ?? 0.68)));
+          const mass = Math.max(0.4, Math.min(8, Number(b.mass ?? cfg?.mass ?? 1.5)));
+
+          if (cfg?.groupId) {
+            const gOff = getGroupMotionOffset(level, cfg.groupId, state.worldTime);
+            b.x += gOff.dx - gOff.prevDx;
+            b.y += gOff.dy - gOff.prevDy;
+          }
 
           b.vy += effectiveGravity * 0.85 * dt;
-          b.vx *= Math.exp(-2.2 * dt);
+          b.vx *= Math.exp(-3.5 * dt);
 
-          const ballBox = { x: b.x - b.radius, y: b.y - b.radius, w: b.radius * 2, h: b.radius * 2 };
-          if (rectsOverlap(p, ballBox)) {
-            const pCenterX = p.x + p.w * 0.5;
-            const pCenterY = p.y + p.h * 0.5;
-            const dx = b.x - pCenterX;
-            const dy = b.y - pCenterY;
-            const dist = Math.max(1, Math.hypot(dx, dy));
-            const nx = dx / dist;
-            const ny = dy / dist;
-            const push = Math.max(110, Math.hypot(p.vx, p.vy) * 1.15) / Math.max(0.5, b.mass);
-            b.vx += nx * push * 0.45 + p.vx * 0.25;
-            b.vy += ny * push * 0.35 - 40;
-          }
+          // 1. Cập nhật vị trí bóng & va chạm với solid/mover trước
+          const speed = Math.hypot(b.vx, b.vy);
+          const steps = Math.max(1, Math.min(6, Math.ceil((speed * dt) / Math.max(4, b.radius * 0.5))));
+          const subDt = dt / steps;
 
-          const nearSolids = getSolidRectsNearPlayer(level, ballBox);
-          const colliders = [...nearSolids, ...moverRects];
+          for (let s = 0; s < steps; s++) {
+            b.x += b.vx * subDt;
+            if (b.x - b.radius < 0) {
+              b.x = b.radius;
+              b.vx = 0;
+            } else if (b.x + b.radius > worldW) {
+              b.x = worldW - b.radius;
+              b.vx = 0;
+            }
 
-          b.x += b.vx * dt;
-          if (b.x - b.radius < 0) {
-            b.x = b.radius;
-            b.vx = Math.abs(b.vx) * 0.45;
-          } else if (b.x + b.radius > worldW) {
-            b.x = worldW - b.radius;
-            b.vx = -Math.abs(b.vx) * 0.45;
-          }
+            for (const box of getBallColliders(b, b.x, b.y)) {
+              const cBox = { x: b.x - b.radius, y: b.y - b.radius, w: b.radius * 2, h: b.radius * 2 };
+              if (rectsOverlap(cBox, box)) {
+                if (b.vx > 0) {
+                  b.x = box.x - b.radius;
+                  b.vx = 0;
+                } else if (b.vx < 0) {
+                  b.x = box.x + box.w + b.radius;
+                  b.vx = 0;
+                }
+              }
+            }
 
-          for (const box of colliders) {
-            const cBox = { x: b.x - b.radius, y: b.y - b.radius, w: b.radius * 2, h: b.radius * 2 };
-            if (rectsOverlap(cBox, box)) {
-              if (b.vx > 0) {
-                b.x = box.x - b.radius;
-                b.vx = -b.vx * 0.4;
-              } else if (b.vx < 0) {
-                b.x = box.x + box.w + b.radius;
-                b.vx = -b.vx * 0.4;
+            b.y += b.vy * subDt;
+            for (const box of getBallColliders(b, b.x, b.y)) {
+              const cBox = { x: b.x - b.radius, y: b.y - b.radius, w: b.radius * 2, h: b.radius * 2 };
+              if (rectsOverlap(cBox, box)) {
+                if (b.vy > 0) {
+                  b.y = box.y - b.radius;
+                  b.vy = Math.abs(b.vy) > 105 ? -b.vy * rest * 0.85 : 0;
+                  b.vx *= Math.exp(-4.5 * subDt);
+                } else if (b.vy < 0) {
+                  b.y = box.y + box.h + b.radius;
+                  b.vy = -b.vy * rest * 0.55;
+                }
               }
             }
           }
 
-          b.y += b.vy * dt;
-          for (const box of colliders) {
-            const cBox = { x: b.x - b.radius, y: b.y - b.radius, w: b.radius * 2, h: b.radius * 2 };
-            if (rectsOverlap(cBox, box)) {
-              if (b.vy > 0) {
-                b.y = box.y - b.radius;
-                b.vy = Math.abs(b.vy) > 120 ? -b.vy * 0.25 : 0;
-                b.vx *= Math.exp(-5.5 * dt);
-              } else if (b.vy < 0) {
-                b.y = box.y + box.h + b.radius;
-                b.vy = 0;
+          // 2. Xử lý va chạm giữa Ball (hình tròn) và Player (hình chữ nhật)
+          const closestX = Math.max(p.x, Math.min(b.x, p.x + p.w));
+          const closestY = Math.max(p.y, Math.min(b.y, p.y + p.h));
+          const diffX = b.x - closestX;
+          const diffY = b.y - closestY;
+          const distSq = diffX * diffX + diffY * diffY;
+
+          if (distSq < b.radius * b.radius) {
+            const dist = Math.sqrt(distSq) || 0.001;
+            const overlap = b.radius - dist;
+            const pCenterX = p.x + p.w * 0.5;
+            const pCenterY = p.y + p.h * 0.5;
+            const nx = distSq > 0.0001 ? diffX / dist : (b.x >= pCenterX ? 1 : -1);
+            const ny = distSq > 0.0001 ? diffY / dist : (b.y >= pCenterY ? 1 : -1);
+
+            // Trường hợp A: Đứng trên đỉnh quả bóng (bóng ở dưới chân nhân vật)
+            const ballBelowPlayer = b.y - b.radius >= p.y + p.h * 0.55 || (ny > 0.55 && p.vy >= -30);
+            if (ballBelowPlayer && p.vy >= -30) {
+              const standY = b.y - b.radius - p.h;
+              if (!playerHitsSolid(p.x, standY) && p.y > standY - 8) {
+                p.y = standY;
+                p.vy = 0;
+                p.onGround = true;
+                if (!ballHitsWorld(b, b.x + b.vx * dt, b.y)) {
+                  p.x = Math.max(0, Math.min(worldW - p.w, p.x + b.vx * dt));
+                }
+                b.vx *= Math.exp(-8 * dt);
+                continue;
+              }
+            }
+
+            // Trường hợp B: Bóng ở phía trên đầu người chơi
+            const ballAbovePlayer = b.y + b.radius * 0.35 <= p.y + p.h * 0.55 && ny < -0.2;
+            if (ballAbovePlayer) {
+              // Thử đẩy người chơi xuống nếu có chỗ trống và không đâm xuyên solid
+              const downPush = Math.min(overlap, 6);
+              if (!playerHitsSolid(p.x, p.y + downPush)) {
+                p.y += downPush;
+              } else {
+                // Nhân vật đã chạm sàn/solid bên dưới: không cho bóng ép xuyên xuống nữa
+                if (b.vy > 0) b.vy = 0;
+                const upPushBall = b.y - overlap;
+                if (!ballHitsWorld(b, b.x, upPushBall)) {
+                  b.y = upPushBall;
+                }
+              }
+
+              // Thử trượt bóng sang ngang nếu có khoảng trống
+              const slideDir = Math.abs(p.vx) > 8 ? Math.sign(p.vx) : (b.x >= pCenterX ? 1 : -1);
+              const slideX = b.x + slideDir * Math.min(overlap * 0.6, 5);
+              if (!ballHitsWorld(b, slideX, b.y)) {
+                b.x = slideX;
+                b.vx += slideDir * 25 * dt;
+              } else {
+                b.vx = 0;
+              }
+              continue;
+            }
+
+            // Trường hợp C: Va chạm ngang / chéo
+            const pushShare = Math.min(0.6, 0.7 / Math.max(0.8, mass));
+            const nextBallX = b.x + nx * overlap * pushShare;
+
+            if (!ballHitsWorld(b, nextBallX, b.y)) {
+              b.x = nextBallX;
+              if (Math.abs(p.vx) > 5) {
+                b.vx += nx * Math.min(95, Math.abs(p.vx) * 0.25) * pushShare;
+              }
+            } else {
+              b.vx = 0;
+            }
+
+            // Đẩy người chơi ra khỏi phần còn đè lên nhau nếu không chạm solid
+            const newClosestX = Math.max(p.x, Math.min(b.x, p.x + p.w));
+            const newClosestY = Math.max(p.y, Math.min(b.y, p.y + p.h));
+            const dX = b.x - newClosestX;
+            const dY = b.y - newClosestY;
+            const dSq = dX * dX + dY * dY;
+            if (dSq < b.radius * b.radius) {
+              const remOverlap = b.radius - (Math.sqrt(dSq) || 0.001);
+              const pushPlayerX = b.x <= pCenterX ? remOverlap : -remOverlap;
+              if (!playerHitsSolid(p.x + pushPlayerX, p.y)) {
+                p.x += pushPlayerX;
+              } else {
+                // Nếu phía sau người chơi có tường/solid thì dừng lực đẩy ngang của người chơi
+                if (pushPlayerX > 0 && p.vx < 0) p.vx = 0;
+                if (pushPlayerX < 0 && p.vx > 0) p.vx = 0;
               }
             }
           }
 
           if (b.y - b.radius > worldH + 40) {
-            const orig = (level.balls || []).find((item) => item.id === b.id);
-            if (orig) {
-              b.x = orig.col * TILE_SIZE + TILE_SIZE * 0.5 + (orig.offsetX || 0);
-              b.y = orig.row * TILE_SIZE + TILE_SIZE * 0.5 + (orig.offsetY || 0);
+            if (cfg) {
+              b.x = cfg.col * TILE_SIZE + TILE_SIZE * 0.5 + (cfg.offsetX || 0);
+              b.y = cfg.row * TILE_SIZE + TILE_SIZE * 0.5 + (cfg.offsetY || 0);
               b.vx = 0;
               b.vy = 0;
             }
@@ -2426,7 +2545,6 @@
           b.rotation += (b.vx * dt) / Math.max(6, b.radius);
         }
       }
-
       function updateGameplay(dt) {
         const level = getCurrentLevel();
         const phys = getEffectivePhysics(level);
@@ -3037,7 +3155,30 @@
           }
         }
       }
+      function setMoverAxisChoice(axisVal, kind = state.selectedEntityKind) {
+        const chosen = axisVal === 'y' ? 'y' : 'x';
+        if (dom.moverAxis) dom.moverAxis.value = chosen;
 
+        const isSpinner = kind === 'spinner';
+        const btnX = document.getElementById('mover-dir-x');
+        const btnY = document.getElementById('mover-dir-y');
+        if (btnX) {
+          btnX.textContent = isSpinner ? '↻ CW' : '↔ X';
+          btnX.title = isSpinner ? 'Forward rotation (CW)' : 'Horizontal (X)';
+          const active = chosen === 'x';
+          btnX.className = active
+            ? 'mover-axis-choice py-1 px-2 rounded-lg bg-sky-500/25 border border-sky-400 text-sky-200 text-[11px] font-semibold transition truncate'
+            : 'mover-axis-choice py-1 px-2 rounded-lg bg-canvas border border-slate-700 text-slate-300 hover:bg-slate-800 text-[11px] font-semibold transition truncate';
+        }
+        if (btnY) {
+          btnY.textContent = isSpinner ? '↺ CCW' : '↕ Y';
+          btnY.title = isSpinner ? 'Reverse rotation (CCW)' : 'Vertical (Y)';
+          const active = chosen === 'y';
+          btnY.className = active
+            ? 'mover-axis-choice py-1 px-2 rounded-lg bg-sky-500/25 border border-sky-400 text-sky-200 text-[11px] font-semibold transition truncate'
+            : 'mover-axis-choice py-1 px-2 rounded-lg bg-canvas border border-slate-700 text-slate-300 hover:bg-slate-800 text-[11px] font-semibold transition truncate';
+        }
+      }
       function renderGame() {
         const viewW = dom.canvas.clientWidth || 800;
         const viewH = dom.canvas.clientHeight || 500;
@@ -3933,43 +4074,54 @@
       }
 
       function updateNodeQuickBar(mover, kind) {
-        if (!dom.nodeQuickBar) return;
-        if (!mover || state.mode !== 'edit') {
-          dom.nodeQuickBar.classList.add('hidden');
-          return;
-        }
-        dom.nodeQuickBar.classList.remove('hidden');
-        dom.quickSpinnerControls.classList.toggle('hidden', kind !== 'spinner');
-        dom.quickLaserControls.classList.toggle('hidden', kind !== 'laser');
-        if (dom.quickLabelControls) {
-          dom.quickLabelControls.classList.toggle('hidden', kind !== 'label');
-        }
+	if (dom.quickBallControls) {
+	  dom.quickBallControls.classList.toggle('hidden', kind !== 'ball');
+	}
+	if (!dom.nodeQuickBar) return;
+	if (!mover || state.mode !== 'edit') {
+	  dom.nodeQuickBar.classList.add('hidden');
+ 	  return;
+	}
 
-        if (kind === 'spinner') {
-          dom.quickNodeTitle.textContent = `SPINNER (${mover.id})`;
-          const mag = Math.abs(Number(mover.speed ?? 2.2));
-          const isCCW = mover.direction === -1 || Number(mover.speed ?? 2.2) < 0;
-          dom.quickSpSpeed.value = String(mag);
-          dom.quickSpDir.textContent = isCCW ? '↺ Reverse rotation (CCW)' : '↻ Forward rotation (CW)';
-          const sz = Number(mover.radiusTiles ?? 1.4);
-          dom.quickSpSize.value = String(sz);
-          dom.quickSpSizeVal.textContent = `${sz.toFixed(1)}t`;
-        } else if (kind === 'laser') {
-	    if (dom.quickLsOn) dom.quickLsOn.value = String(clampLaserDurationSec(mover.illuminationTime ?? 1, 1));
-	    if (dom.quickLsWait) dom.quickLsWait.value = String(clampLaserDurationSec(mover.waitingTime ?? 1, 1));
-	    if (dom.quickLsOffset) dom.quickLsOffset.value = String(Number(mover.timeOffset) || 0);
-	    if (dom.quickLsPermanent) dom.quickLsPermanent.checked = Boolean(mover.permanent);
-          dom.quickNodeTitle.textContent = `LASER (${mover.id})`;
-          dom.quickLsAxis.textContent = mover.axis === 'y' ? 'Direction: Vertical (Y)' : 'Direction: Horizontal (X)';
-          dom.quickLsLen.value = String(Number(mover.lengthTiles ?? 3.5));
-        } else if (kind === 'label') {
-          dom.quickNodeTitle.textContent = `LABEL (${mover.id})`;
-          if (dom.quickLblText) dom.quickLblText.value = mover.text ?? '';
-          if (dom.quickLblSize) dom.quickLblSize.value = String(mover.fontSize ?? 15);
-          if (dom.quickLblColor) dom.quickLblColor.value = mover.color || '#fde047';
-        } else {
-          dom.quickNodeTitle.textContent = `${kind.toUpperCase()} (${mover.id})`;
-        }
+	dom.nodeQuickBar.classList.remove('hidden');
+	dom.quickSpinnerControls.classList.toggle('hidden', kind !== 'spinner');
+	dom.quickLaserControls.classList.toggle('hidden', kind !== 'laser');
+	if (dom.quickLabelControls) {
+	  dom.quickLabelControls.classList.toggle('hidden', kind !== 'label');
+	}
+
+	if (kind === 'ball') {
+	  dom.quickNodeTitle.textContent = `BALL (${mover.id})`;
+	  const mVal = Number(mover.mass ?? 1.5);
+	  const bVal = Number(mover.restitution ?? 0.68);
+	  if (dom.quickBallMass) dom.quickBallMass.value = String(mVal);
+	  if (dom.quickBallBounce) dom.quickBallBounce.value = String(bVal);
+	  if (dom.quickBallBounceVal) dom.quickBallBounceVal.textContent = bVal.toFixed(2);
+	} else if (kind === 'spinner') {
+	  dom.quickNodeTitle.textContent = `SPINNER (${mover.id})`;
+	  const mag = Math.abs(Number(mover.speed ?? 2.2));
+	  const isCCW = mover.direction === -1 || Number(mover.speed ?? 2.2) < 0;
+	  dom.quickSpSpeed.value = String(mag);
+	  dom.quickSpDir.textContent = isCCW ? '↺ Reverse rotation (CCW)' : '↻ Forward rotation (CW)';
+	  const sz = Number(mover.radiusTiles ?? 1.4);
+	  dom.quickSpSize.value = String(sz);
+	  dom.quickSpSizeVal.textContent = `${sz.toFixed(1)}t`;
+  	} else if (kind === 'laser') {
+	  if (dom.quickLsOn) dom.quickLsOn.value = String(clampLaserDurationSec(mover.illuminationTime ?? 1, 1));
+	  if (dom.quickLsWait) dom.quickLsWait.value = String(clampLaserDurationSec(mover.waitingTime ?? 1, 1));
+	  if (dom.quickLsOffset) dom.quickLsOffset.value = String(Number(mover.timeOffset) || 0);
+	  if (dom.quickLsPermanent) dom.quickLsPermanent.checked = Boolean(mover.permanent);
+	  dom.quickNodeTitle.textContent = `LASER (${mover.id})`;
+	  dom.quickLsAxis.textContent = mover.axis === 'y' ? 'Direction: Vertical (Y)' : 'Direction: Horizontal (X)';
+	  dom.quickLsLen.value = String(Number(mover.lengthTiles ?? 3.5));
+  	} else if (kind === 'label') {
+	  dom.quickNodeTitle.textContent = `LABEL (${mover.id})`;
+	  if (dom.quickLblText) dom.quickLblText.value = mover.text ?? '';
+	  if (dom.quickLblSize) dom.quickLblSize.value = String(mover.fontSize ?? 15);
+	  if (dom.quickLblColor) dom.quickLblColor.value = mover.color || '#fde047';
+  	} else {
+	  dom.quickNodeTitle.textContent = `${kind.toUpperCase()} (${mover.id})`;
+	}
       }
 
       function selectMover(mover, kind = 'mover', additive = false) {
@@ -3985,6 +4137,13 @@
           if (kind === 'spinner') {
             const isCCW = mover.direction === -1 || Number(mover.speed ?? 2.2) < 0;
             dom.moverAxis.value = isCCW ? 'y' : 'x';
+	    const rangeWrap = document.getElementById('mover-range-wrap');
+	    const speedWrap = document.getElementById('mover-speed-wrap');
+	    const axisDirBox = document.getElementById('mover-axis-dir-box');
+	    if (rangeWrap) rangeWrap.classList.toggle('hidden', kind === 'ball');
+	    if (speedWrap) speedWrap.classList.toggle('hidden', kind === 'ball');
+	    if (axisDirBox) axisDirBox.classList.toggle('hidden', kind === 'ball' || kind === 'label');
+	    setMoverAxisChoice(dom.moverAxis.value, kind);
             dom.moverRange.value = String(mover.radiusTiles ?? 1.4);
             dom.moverSpeed.value = String(Math.abs(Number(mover.speed ?? 2.2)));
             if (dom.lblMoverAxis) dom.lblMoverAxis.textContent = 'Rotation direction (CW/CCW)';
@@ -4283,29 +4442,78 @@
         saveToLocalStorage();
         syncJsonTextarea();
       }
+            function applyMoverInspectorChanges() {
+        const level = getCurrentLevel();
+        if (!level) return;
 
+        const selectedIds = Array.isArray(state.selectedEntities) && state.selectedEntities.length
+          ? state.selectedEntities.map((e) => ({ id: e.id, kind: e.kind }))
+          : (state.selectedMoverId ? [{ id: state.selectedMoverId, kind: state.selectedEntityKind || 'mover' }] : []);
+        if (!selectedIds.length) return;
+
+        const axisVal = dom.moverAxis?.value === 'y' ? 'y' : 'x';
+        const rangeVal = Number(dom.moverRange?.value);
+        const offX = Number(dom.moverOffsetX?.value);
+        const offY = Number(dom.moverOffsetY?.value);
+        const speedVal = Number(dom.moverSpeed?.value);
+
+        for (const ref of selectedIds) {
+          const item = getEntityByIdAndKind(level, ref.id, ref.kind);
+          if (!item) continue;
+
+          if (ref.kind !== 'ball' && ref.kind !== 'label') {
+            item.axis = axisVal;
+          }
+          if (Number.isFinite(offX)) {
+            item.offsetX = Math.max(-400, Math.min(400, offX));
+          }
+          if (Number.isFinite(offY)) {
+            item.offsetY = Math.max(-400, Math.min(400, offY));
+          }
+
+          if (ref.kind === 'spinner') {
+            const dir = axisVal === 'y' ? -1 : 1;
+            item.direction = dir;
+            if (Number.isFinite(rangeVal)) item.radiusTiles = Math.max(0.4, Math.min(6.0, rangeVal));
+            if (Number.isFinite(speedVal) && speedVal > 0) item.speed = Math.min(15, speedVal) * dir;
+          } else if (ref.kind === 'laser') {
+            if (Number.isFinite(rangeVal) && rangeVal !== 0) {
+              let lenVal = rangeVal;
+              if (Math.abs(lenVal) < 0.5) lenVal = lenVal < 0 ? -0.5 : 0.5;
+              item.lengthTiles = Math.max(-100, Math.min(100, lenVal));
+            }
+            if (Number.isFinite(speedVal) && speedVal > 0) item.speed = Math.max(0.1, Math.min(15, speedVal));
+          } else if (ref.kind === 'label') {
+            if (Number.isFinite(rangeVal)) item.fontSize = Math.max(10, Math.min(48, rangeVal));
+          } else if (ref.kind === 'mover') {
+            if (Number.isFinite(rangeVal)) item.rangeTiles = Math.max(0.5, Math.min(16, rangeVal));
+            if (Number.isFinite(speedVal) && speedVal > 0) item.speed = Math.max(0.1, Math.min(15, speedVal));
+          } else if (ref.kind === 'ball') {
+            initBallsForLevel(level);
+          }
+        }
+      }
       function setMode(newMode) {
-        state.mode = newMode;
-        const isEdit = newMode === 'edit';
+  	state.mode = newMode;
+	const isEdit = newMode === 'edit';
 
-        dom.btnModePlay.className = isEdit
-          ? 'px-2.5 py-1 rounded-md text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white'
-          : 'px-2.5 py-1 rounded-md text-xs font-semibold transition flex items-center gap-1.5 bg-sky-500 text-slate-950 shadow';
+	dom.btnModePlay.className = isEdit
+	  ? 'px-2.5 py-1 rounded-md text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white'
+	  : 'px-2.5 py-1 rounded-md text-xs font-semibold transition flex items-center gap-1.5 bg-sky-500 text-slate-950 shadow';
 
-        dom.btnModeEdit.className = isEdit
-          ? 'px-2.5 py-1 rounded-md text-xs font-semibold transition flex items-center gap-1.5 bg-amber-400 text-slate-950 shadow'
-          : 'px-2.5 py-1 rounded-md text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white';
+	dom.btnModeEdit.className = isEdit
+	  ? 'px-2.5 py-1 rounded-md text-xs font-semibold transition flex items-center gap-1.5 bg-amber-400 text-slate-950 shadow'
+	  : 'px-2.5 py-1 rounded-md text-xs font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white';
 
-        dom.editBrushBar.classList.toggle('hidden', !isEdit);
-        updateNodeQuickBar(
-          isEdit && state.selectedMoverId ? getEntityByIdAndKind(getCurrentLevel(), state.selectedMoverId, state.selectedEntityKind) : null,
-          state.selectedEntityKind
-        );
-        updateUndoRedoButtons();
+	dom.editBrushBar.classList.toggle('hidden', !isEdit);
+	updateNodeQuickBar(
+	  isEdit && state.selectedMoverId ? getEntityByIdAndKind(getCurrentLevel(), state.selectedMoverId, 		  state.selectedEntityKind) : null,
+    state.selectedEntityKind
+	);
+	updateUndoRedoButtons();
 
-        if (!isEdit) {
+	if (!isEdit) {
 	  respawnPlayer(false);
-	  showToast('Play mode active', 'info');
 	} else {
 	  state.activeBrush = 'select';
 	  document.querySelectorAll('.brush-btn').forEach((b) => {
@@ -4316,8 +4524,11 @@
 	        ? 'brush-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition text-rose-300 hover:bg-rose-950/60'
 	        : 'brush-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition text-slate-300 hover:bg-slate-800');
 	  });
-	  showToast('Edit mode: Select tool active', 'warn');
 	}
+
+	saveToLocalStorage();
+	syncJsonTextarea();
+	if (typeof renderGame === 'function') renderGame();
       }
 
       function setDrawerOpen(open) {
@@ -4569,30 +4780,76 @@
         switchToLevel(state.currentLevelIndex, true);
         showToast(`Deleted "${removed.name}"`, 'info');
       }
-
+        
       function bindEvents() {
+        document.querySelectorAll('.mover-axis-choice').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const val = btn.dataset.axisVal === 'y' ? 'y' : 'x';
+            setMoverAxisChoice(val, state.selectedEntityKind);
+            applyMoverInspectorChanges();
+          });
+        });
+
+        ['mover-range', 'mover-offset-x', 'mover-offset-y', 'mover-speed'].forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.addEventListener('input', applyMoverInspectorChanges);
+          el.addEventListener('change', applyMoverInspectorChanges);
+        });
+
+        if (dom.quickBallMass) {
+          dom.quickBallMass.addEventListener('input', () => {
+            const level = getCurrentLevel();
+            const b = (level.balls || []).find((x) => x.id === state.selectedMoverId);
+            if (!b) return;
+            const raw = Number(dom.quickBallMass.value);
+            if (!Number.isFinite(raw)) return;
+            const clamped = Math.max(0.4, Math.min(8, raw));
+            b.mass = clamped;
+            const liveBall = (state.ballRuntime || []).find((rb) => rb.id === b.id);
+            if (liveBall) liveBall.mass = clamped;
+            saveToLocalStorage();
+            syncJsonTextarea();
+          });
+        }
+
+        if (dom.quickBallBounce) {
+          dom.quickBallBounce.addEventListener('input', () => {
+            const level = getCurrentLevel();
+            const b = (level.balls || []).find((x) => x.id === state.selectedMoverId);
+            if (!b) return;
+            const clamped = Math.max(0.1, Math.min(0.95, Number(dom.quickBallBounce.value) || 0.68));
+            b.restitution = clamped;
+            if (dom.quickBallBounceVal) dom.quickBallBounceVal.textContent = clamped.toFixed(2);
+            const liveBall = (state.ballRuntime || []).find((rb) => rb.id === b.id);
+            if (liveBall) liveBall.restitution = clamped;
+            saveToLocalStorage();
+            syncJsonTextarea();
+          });
+        }
+
         window.addEventListener('resize', resizeCanvas);
 
         window.addEventListener('keydown', (e) => {
-	  const tag = document.activeElement?.tagName;
-	  const isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+          const tag = document.activeElement?.tagName;
+          const isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
 
-	  if (
-	    e.code === 'KeyN' &&
-	    !isTyping &&
-	    state.levelComplete &&
-	    dom.levelCompleteBanner &&
-	    !dom.levelCompleteBanner.classList.contains('hidden')
-	  ) {
-	    e.preventDefault();
-	    switchToLevel(state.currentLevelIndex + 1, true);
-	    return;
-	  }
-	  if (state.mode === 'play' && ['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD', 'Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
-	    if (tag === 'SELECT' && document.activeElement && typeof document.activeElement.blur === 'function') {
+          if (
+            e.code === 'KeyN' &&
+            !isTyping &&
+            state.levelComplete &&
+            dom.levelCompleteBanner &&
+            !dom.levelCompleteBanner.classList.contains('hidden')
+          ) {
+            e.preventDefault();
+            switchToLevel(state.currentLevelIndex + 1, true);
+            return;
+          }
+          if (state.mode === 'play' && ['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD', 'Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
+            if (tag === 'SELECT' && document.activeElement && typeof document.activeElement.blur === 'function') {
               document.activeElement.blur();
-	    }
-	  }
+            }
+          }
 
           if (e.code === 'Space' && !isTyping && state.mode === 'edit') {
             state.keys.spacePan = true;
@@ -4676,7 +4933,6 @@
           if (document.hidden) resetHeldKeys();
         });
 
-
         document.addEventListener('pointerdown', (e) => {
           const btn = e.target.closest('button, [role="button"]');
           if (!btn || btn.disabled) return;
@@ -4684,31 +4940,31 @@
           SoundFX.click();
         });
 
-	document.addEventListener('pointerdown', (e) => {
-	  if (state.mode !== 'edit') return;
-	  const hasSelection =
-	    state.selectedCells.length > 0 ||
-	    state.selectedEntities.length > 0 ||
-	    state.selectedSpawn ||
-	    Boolean(state.selectedMoverId);
-	  if (!hasSelection) return;
+        document.addEventListener('pointerdown', (e) => {
+          if (state.mode !== 'edit') return;
+          const hasSelection =
+            state.selectedCells.length > 0 ||
+            state.selectedEntities.length > 0 ||
+            state.selectedSpawn ||
+            Boolean(state.selectedMoverId);
+          if (!hasSelection) return;
 
-	  const target = e.target;
-	  if (!(target instanceof Element)) return;
-	  if (
-	    target.closest('#game-canvas') ||
-	    target.closest('#node-quick-bar') ||
-	    target.closest('#edit-brush-bar') ||
-	    target.closest('#tuner-drawer')
-	  ) {
-	    return;
-	  }
-	  state.selectedCells = [];
-	  state.selectedEntities = [];
-	  state.selectedSpawn = false;
-	  selectMover(null, 'mover', false);
-	  syncLevelsUI();
-	});
+          const target = e.target;
+          if (!(target instanceof Element)) return;
+          if (
+            target.closest('#game-canvas') ||
+            target.closest('#node-quick-bar') ||
+            target.closest('#edit-brush-bar') ||
+            target.closest('#tuner-drawer')
+          ) {
+            return;
+          }
+          state.selectedCells = [];
+          state.selectedEntities = [];
+          state.selectedSpawn = false;
+          selectMover(null, 'mover', false);
+          syncLevelsUI();
+        });
 
         const bindTouchHold = (btn, onStart, onEnd) => {
           if (!btn) return;
@@ -4764,7 +5020,7 @@
           showToast('Course restarted', 'info');
         });
 
-	const btnAudio = document.getElementById('btn-toggle-audio');
+        const btnAudio = document.getElementById('btn-toggle-audio');
         const audioIcon = document.getElementById('audio-icon');
         if (btnAudio) {
           btnAudio.addEventListener('click', () => {
@@ -4935,10 +5191,10 @@
                 ? (cell.worldY - seg.startY)
                 : (cell.worldX - seg.startX);
               let tiles = Math.round((deltaPx / TILE_SIZE) * 4) / 4;
-	      if (Math.abs(tiles) < 0.5) {
-	        tiles = tiles < 0 ? -0.5 : 0.5;
+              if (Math.abs(tiles) < 0.5) {
+                tiles = tiles < 0 ? -0.5 : 0.5;
               }
-	      tiles = Math.max(-100, Math.min(100, tiles));
+              tiles = Math.max(-100, Math.min(100, tiles));
               laser.lengthTiles = tiles;
               if (dom.moverRange) dom.moverRange.value = String(laser.lengthTiles);
               if (dom.quickLsLen) dom.quickLsLen.value = String(laser.lengthTiles);
@@ -5090,7 +5346,7 @@
           state.pointer.strokeSnapshotTaken = false;
         });
 
-	for (const key of Object.keys(DEFAULT_PHYSICS)) {
+        for (const key of Object.keys(DEFAULT_PHYSICS)) {
           const slider = dom.sliders[key];
           if (!slider) continue;
           slider.addEventListener('input', () => {
@@ -5112,12 +5368,12 @@
         }
 
         dom.btnResetPhysics.addEventListener('click', () => {
-	  const level = getCurrentLevel();
+          const level = getCurrentLevel();
           state.physics = { ...DEFAULT_PHYSICS };
-	  if (level.physics) {
-	    level.physics = { ...DEFAULT_PHYSICS };
-	  }
-	  applyPlayerDimensions();
+          if (level.physics) {
+            level.physics = { ...DEFAULT_PHYSICS };
+          }
+          applyPlayerDimensions();
           syncPhysicsInputs();
           saveToLocalStorage();
           syncJsonTextarea();
@@ -5207,48 +5463,49 @@
             showToast(`Created ${newGroup.name} (${state.selectedCells.length + allEnts.length} items)`, 'success');
           });
         }
+
         if (dom.btnDeleteGroup) {
-	  dom.btnDeleteGroup.addEventListener('click', () => {
-	    const level = getCurrentLevel();
-	    const grpIndex = (level.groups || []).findIndex((g) => g.id === state.selectedGroupId);
-	    if (grpIndex === -1) {
-	      showToast('Please select a Group from the list below', 'warn');
-	      return;
-	    }
-	    pushUndoSnapshot();
-	    const removedGrp = level.groups[grpIndex];
+          dom.btnDeleteGroup.addEventListener('click', () => {
+            const level = getCurrentLevel();
+            const grpIndex = (level.groups || []).findIndex((g) => g.id === state.selectedGroupId);
+            if (grpIndex === -1) {
+              showToast('Please select a Group from the list below', 'warn');
+              return;
+            }
+            pushUndoSnapshot();
+            const removedGrp = level.groups[grpIndex];
 
-	    for (const id of removedGrp.moverIds || []) {
-	      const m = (level.movers || []).find((x) => x.id === id);
-	      if (m) m.groupId = null;
-	    }
-	    for (const id of removedGrp.ballIds || []) {
-	      const b = (level.balls || []).find((x) => x.id === id);
-	      if (b) b.groupId = null;
-	    }
-	    for (const id of removedGrp.spinnerIds || []) {
-	      const sp = (level.spinners || []).find((x) => x.id === id);
-	      if (sp) sp.groupId = null;
-	    }
-	    for (const id of removedGrp.laserIds || []) {
-	      const l = (level.lasers || []).find((x) => x.id === id);
-	      if (l) l.groupId = null;
-	    }
-	    for (const id of removedGrp.labelIds || []) {
-	      const lb = (level.labels || []).find((x) => x.id === id);
-	      if (lb) lb.groupId = null;
-	    }
+            for (const id of removedGrp.moverIds || []) {
+              const m = (level.movers || []).find((x) => x.id === id);
+              if (m) m.groupId = null;
+            }
+            for (const id of removedGrp.ballIds || []) {
+              const b = (level.balls || []).find((x) => x.id === id);
+              if (b) b.groupId = null;
+            }
+            for (const id of removedGrp.spinnerIds || []) {
+              const sp = (level.spinners || []).find((x) => x.id === id);
+              if (sp) sp.groupId = null;
+            }
+            for (const id of removedGrp.laserIds || []) {
+              const l = (level.lasers || []).find((x) => x.id === id);
+              if (l) l.groupId = null;
+            }
+            for (const id of removedGrp.labelIds || []) {
+              const lb = (level.labels || []).find((x) => x.id === id);
+              if (lb) lb.groupId = null;
+            }
 
-    	    level.groups.splice(grpIndex, 1);
-    	    state.selectedGroupId = null;
-    	    state.selectedCells = [];
-    	    state.selectedEntities = [];
-    	    selectMover(null);
-    	    syncLevelsUI();
-	    saveToLocalStorage();
-	    syncJsonTextarea();
-	    showToast(`Deleted ${removedGrp.name || 'Group'}`, 'info');
-	  });
+            level.groups.splice(grpIndex, 1);
+            state.selectedGroupId = null;
+            state.selectedCells = [];
+            state.selectedEntities = [];
+            selectMover(null);
+            syncLevelsUI();
+            saveToLocalStorage();
+            syncJsonTextarea();
+            showToast(`Deleted ${removedGrp.name || 'Group'}`, 'info');
+          });
         }
 
         if (dom.btnClearSelection) {
@@ -5346,8 +5603,8 @@
             const l = (level.lasers || []).find((x) => x.id === state.selectedMoverId);
             if (!l) return;
 
-	    let lenVal = Number(dom.quickLsLen.value);
-	    if (!Number.isFinite(lenVal) || lenVal === 0) return;
+            let lenVal = Number(dom.quickLsLen.value);
+            if (!Number.isFinite(lenVal) || lenVal === 0) return;
             if (Math.abs(lenVal) < 0.5) lenVal = lenVal < 0 ? -0.5 : 0.5;
             l.lengthTiles = Math.max(-100, Math.min(100, lenVal));
             if (dom.moverRange) dom.moverRange.value = String(l.lengthTiles);
@@ -5357,32 +5614,32 @@
           });
         }
 
-	const bindLaserDurationInput = (inputEl, propName, fallbackVal) => {
-	  if (!inputEl) return;
-	  inputEl.addEventListener('input', () => {
- 	    const level = getCurrentLevel();
- 	    const l = (level.lasers || []).find((x) => x.id === state.selectedMoverId);
- 	    if (!l) return;
- 	    const raw = inputEl.value.trim();
- 	    if (raw === '' || raw === '.' || raw.endsWith('.')) return;
- 	    const num = Number(raw);
- 	    if (!Number.isFinite(num)) return;
- 	    const clamped = Math.max(0, Math.min(100, num));
- 	    l[propName] = clamped;
- 	    saveToLocalStorage();
- 	    syncJsonTextarea();
-	  });
-	  inputEl.addEventListener('change', () => {
-	    const level = getCurrentLevel();
- 	    const l = (level.lasers || []).find((x) => x.id === state.selectedMoverId);
- 	    if (!l) return;
- 	    const clamped = clampLaserDurationSec(inputEl.value, fallbackVal);
- 	    l[propName] = clamped;
- 	    inputEl.value = String(clamped);
- 	    saveToLocalStorage();
- 	    syncJsonTextarea();
-	  });
-	};
+        const bindLaserDurationInput = (inputEl, propName, fallbackVal) => {
+          if (!inputEl) return;
+          inputEl.addEventListener('input', () => {
+            const level = getCurrentLevel();
+            const l = (level.lasers || []).find((x) => x.id === state.selectedMoverId);
+            if (!l) return;
+            const raw = inputEl.value.trim();
+            if (raw === '' || raw === '.' || raw.endsWith('.')) return;
+            const num = Number(raw);
+            if (!Number.isFinite(num)) return;
+            const clamped = Math.max(0, Math.min(100, num));
+            l[propName] = clamped;
+            saveToLocalStorage();
+            syncJsonTextarea();
+          });
+          inputEl.addEventListener('change', () => {
+            const level = getCurrentLevel();
+            const l = (level.lasers || []).find((x) => x.id === state.selectedMoverId);
+            if (!l) return;
+            const clamped = clampLaserDurationSec(inputEl.value, fallbackVal);
+            l[propName] = clamped;
+            inputEl.value = String(clamped);
+            saveToLocalStorage();
+            syncJsonTextarea();
+          });
+        };
 
         bindLaserDurationInput(dom.quickLsOn, 'illuminationTime', 1);
         bindLaserDurationInput(dom.quickLsWait, 'waitingTime', 1);
@@ -5397,22 +5654,22 @@
             syncJsonTextarea();
           });
         }
-	if (dom.quickLsOffset) {
-	  dom.quickLsOffset.addEventListener('input', () => {
-	    const level = getCurrentLevel();
-	    const l = (level.lasers || []).find((x) => x.id === state.selectedMoverId);
-	    if (!l) return;
-	    const raw = dom.quickLsOffset.value.trim();
-	    if (raw === '' || raw === '-' || raw === '.' || raw === '-.') return;
-	    const num = Number(raw);
-	    if (!Number.isFinite(num)) return;
-	    l.timeOffset = num;
-	    saveToLocalStorage();
-	    syncJsonTextarea();
-	  });
-	}
 
-        // Sự kiện chỉnh sửa nhanh nội dung, cỡ chữ và màu sắc của Label
+        if (dom.quickLsOffset) {
+          dom.quickLsOffset.addEventListener('input', () => {
+            const level = getCurrentLevel();
+            const l = (level.lasers || []).find((x) => x.id === state.selectedMoverId);
+            if (!l) return;
+            const raw = dom.quickLsOffset.value.trim();
+            if (raw === '' || raw === '-' || raw === '.' || raw === '-.') return;
+            const num = Number(raw);
+            if (!Number.isFinite(num)) return;
+            l.timeOffset = num;
+            saveToLocalStorage();
+            syncJsonTextarea();
+          });
+        }
+
         if (dom.quickLblText) {
           dom.quickLblText.addEventListener('input', () => {
             const level = getCurrentLevel();
@@ -5453,72 +5710,17 @@
         if (dom.btnFillFloor) dom.btnFillFloor.addEventListener('click', fillBaseFloor);
         if (dom.btnClearGrid) dom.btnClearGrid.addEventListener('click', clearInteriorTiles);
 
-        dom.btnApplyMover.addEventListener('click', () => {
-          if (!state.selectedMoverId) {
-            showToast('Click a mover, ball, spinner, laser, or label in Edit mode first', 'warn');
-            return;
-          }
-          pushUndoSnapshot();
-          const level = getCurrentLevel();
-          const kind = state.selectedEntityKind || 'mover';
-          const ox = Math.max(-400, Math.min(400, Number(dom.moverOffsetX?.value) || 0));
-          const oy = Math.max(-400, Math.min(400, Number(dom.moverOffsetY?.value) || 0));
-          const spd = Math.max(0.1, Math.min(15, Number(dom.moverSpeed.value) || 1.6));
-          const val = Number(dom.moverRange.value) || 2.5;
-
-          if (kind === 'label') {
-            const lb = (level.labels || []).find((item) => item.id === state.selectedMoverId);
-            if (lb) {
-              lb.fontSize = Math.max(10, Math.min(48, val));
-              lb.offsetX = ox;
-              lb.offsetY = oy;
-              updateNodeQuickBar(lb, 'label');
+        if (dom.btnApplyMover) {
+          dom.btnApplyMover.addEventListener('click', () => {
+            if (!state.selectedMoverId) {
+              showToast('Click a mover, ball, spinner, laser, or label in Edit mode first', 'warn');
+              return;
             }
-          } else if (kind === 'ball') {
-            const b = (level.balls || []).find((item) => item.id === state.selectedMoverId);
-            if (b) {
-              b.mass = Math.max(0.4, Math.min(8, val));
-              b.offsetX = ox;
-              b.offsetY = oy;
-              initBallsForLevel(level);
-            }
-          } else if (kind === 'laser') {
-            const l = (level.lasers || []).find((item) => item.id === state.selectedMoverId);
-            if (l) {
-              l.axis = dom.moverAxis.value === 'y' ? 'y' : 'x';
-              let lenVal = val;
-	      if (Math.abs(lenVal) < 0.5) lenVal = lenVal < 0 ? -0.5 : 0.5;
-	      l.lengthTiles = Math.max(-100, Math.min(100, lenVal));
-              l.speed = spd;
-              l.offsetX = ox;
-              l.offsetY = oy;
-              updateNodeQuickBar(l, 'laser');
-            }
-          } else if (kind === 'spinner') {
-            const sp = (level.spinners || []).find((item) => item.id === state.selectedMoverId);
-            if (sp) {
-              const dir = dom.moverAxis.value === 'y' ? -1 : 1;
-              sp.direction = dir;
-              sp.radiusTiles = Math.max(0.4, Math.min(6.0, val));
-              sp.speed = Math.abs(spd) * dir;
-              sp.offsetX = ox;
-              sp.offsetY = oy;
-              updateNodeQuickBar(sp, 'spinner');
-            }
-          } else {
-            const mover = (level.movers || []).find((m) => m.id === state.selectedMoverId);
-            if (!mover) return;
-            mover.axis = dom.moverAxis.value === 'y' ? 'y' : 'x';
-            mover.rangeTiles = Math.max(0.5, Math.min(16, val));
-            mover.speed = spd;
-            mover.offsetX = ox;
-            mover.offsetY = oy;
-          }
-
-          saveToLocalStorage();
-          syncJsonTextarea();
-          showToast(`Updated ${state.selectedMoverId}`, 'success');
-        });
+            pushUndoSnapshot();
+            applyMoverInspectorChanges();
+            showToast(`Updated ${state.selectedMoverId}`, 'success');
+          });
+        }
 
         const copyTextToClipboard = (text) => {
           if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -5593,18 +5795,18 @@
               }
             }
 
-	    const startIdx = state.levels.length;
-	    const importedLevels = parsed.levels.map((lvl, idx) => {
-	      const normalized = normalizeLevel(lvl, startIdx + idx);
+            const startIdx = state.levels.length;
+            const importedLevels = parsed.levels.map((lvl, idx) => {
+              const normalized = normalizeLevel(lvl, startIdx + idx);
               normalized.id = `lvl-${Date.now().toString(36)}-${idx}-${Math.random().toString(36).slice(2, 6)}`;
               return normalized;
             });
 
-	    state.levels.push(...importedLevels);
+            state.levels.push(...importedLevels);
             if (parsed.physics && typeof parsed.physics === 'object') {
               state.physics = { ...DEFAULT_PHYSICS, ...parsed.physics };
             }
-	    state.undoStack = [];
+            state.undoStack = [];
             state.redoStack = [];
             switchToLevel(startIdx, true);
             saveToLocalStorage();
@@ -5614,13 +5816,15 @@
             showToast(`JSON Error: ${err.message}`, 'error');
           }
         });
-	if (dom.btnClearJson) {
+
+        if (dom.btnClearJson) {
           dom.btnClearJson.addEventListener('click', () => {
             dom.jsonTextarea.value = '';
             dom.jsonTextarea.focus();
             showToast('Cleared JSON text below', 'info');
           });
         }
+
         dom.btnResetDefaults.addEventListener('click', () => {
           localStorage.removeItem(STORAGE_KEY);
           state.physics = { ...DEFAULT_PHYSICS };
