@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Parkour Forge — 2D Platformer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -36,7 +36,9 @@
       user-select: none;
       -webkit-user-select: none;
     }
-
+    html, body, button {
+      touch-action: manipulation;
+    }
     html, body {
       margin: 0;
       padding: 0;
@@ -156,7 +158,6 @@
 
       <button id="btn-toggle-audio" type="button" title="Toggle Sound Effects" class="px-2.5 py-1.5 rounded-lg bg-surface hover:bg-slate-700/70 active:scale-95 border border-slate-700/80 text-xs font-semibold text-emerald-300 transition flex items-center gap-1">
         <span id="audio-icon">🔊</span>
-	<span class="hidden sm:inline">SFX</span>
       </button>
 
       <button id="btn-toggle-drawer" type="button" title="Toggle Level & Game Tuner (E)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 border border-sky-500/40 text-xs font-semibold text-sky-300 transition flex items-center gap-1.5 shadow-sm">
@@ -319,19 +320,17 @@
       </div>
 
       <!-- Debug / FPS & Hitbox Overlay -->
-      <div id="debug-overlay" class="hidden pointer-events-none absolute top-16 left-3 z-10 bg-panel/90 backdrop-blur-md border border-emerald-500/35 rounded-xl p-3 font-mono text-[11px] text-slate-200 space-y-1 shadow-2xl min-w-[235px]">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-1 mb-1">
-          <span class="text-emerald-400 font-bold tracking-wider">DEBUG / HITBOX</span>
-          <span id="dbg-fps" class="text-sky-300 font-semibold">60 FPS</span>
+      <div id="debug-overlay" class="hidden pointer-events-none fixed sm:absolute top-14 sm:top-16 left-2 sm:left-3 z-10 font-mono text-[9.5px] leading-[1.12] text-white" style="text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 2px #000;">
+        <div class="flex items-center gap-2 mb-0.5">
+          <span id="dbg-fps" class="font-semibold">60 FPS</span>
         </div>
-        <div class="flex justify-between gap-4"><span class="text-slate-400">Frame dt:</span><span id="dbg-dt">16.6 ms</span></div>
-        <div class="flex justify-between gap-4"><span class="text-slate-400">Pos (px):</span><span id="dbg-pos">0, 0</span></div>
-        <div class="flex justify-between gap-4"><span class="text-slate-400">Vel (px/s):</span><span id="dbg-vel">0, 0</span></div>
-        <div class="flex justify-between gap-4"><span class="text-slate-400">Ground / Wall:</span><span id="dbg-state">AIR / 0</span></div>
-        <div class="flex justify-between gap-4"><span class="text-slate-400">Coyote / Buf:</span><span id="dbg-timers">0ms / 0ms</span></div>
-        <div class="flex justify-between gap-4"><span class="text-slate-400">Cam / Zoom:</span><span id="dbg-cam">Follow · 1.00x</span></div>
+        <div class="flex gap-1.5"><span>dt:</span><span id="dbg-dt">16.6 ms</span></div>
+        <div class="flex gap-1.5"><span>Pos:</span><span id="dbg-pos">0, 0</span></div>
+        <div class="flex gap-1.5"><span>Vel:</span><span id="dbg-vel">0, 0</span></div>
+        <div class="flex gap-1.5"><span>G/W:</span><span id="dbg-state">AIR / 0</span></div>
+        <div class="flex gap-1.5"><span>C/B:</span><span id="dbg-timers">0ms / 0ms</span></div>
+        <div class="flex gap-1.5"><span>Cam:</span><span id="dbg-cam">Follow · 1.00x</span></div>
       </div>
-
 	<!-- Level Complete Overlay -->
       <div id="level-complete-banner" class="hidden absolute inset-0 z-10 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-hidden">
         <canvas id="victory-fireworks-canvas" class="pointer-events-none absolute inset-0 w-full h-full z-0"></canvas>
@@ -680,8 +679,11 @@
             <button id="btn-import-json" type="button" class="px-3 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 text-xs font-semibold transition">
               ⬆ Load JSON Below
             </button>
-            <button id="btn-reset-defaults" type="button" class="col-span-2 px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 text-xs font-semibold transition">
+            <button id="btn-reset-defaults" type="button" class="px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 text-xs font-semibold transition">
               ↺ Reset Defaults
+            </button>
+            <button id="btn-clear-json" type="button" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs font-semibold transition">
+               🗑Delete JSON Below
             </button>
           </div>
 
@@ -1631,6 +1633,7 @@
         btnDownloadJson: document.getElementById('btn-download-json'),
         btnImportJson: document.getElementById('btn-import-json'),
         btnResetDefaults: document.getElementById('btn-reset-defaults'),
+	btnClearJson: document.getElementById('btn-clear-json'),
         btnResetPhysics: document.getElementById('btn-reset-physics'),
         jsonTextarea: document.getElementById('json-textarea'),
 
@@ -2759,7 +2762,6 @@
                 state.keysCollected += 1;
                 state.unlockedDoors = true;
                 spawnParticles(tx + TILE_SIZE * 0.5, ty + TILE_SIZE * 0.5, '#fde047', 16, 45, 200, 0.25, 0.55);
-                showToast('Key collected! Doors unlocked', 'success');
               }
             } else if (tile === TILE.PORTAL && state.portalCooldownMs <= 0) {
               const pBox = {
@@ -2789,7 +2791,6 @@
                   p.y = dest.y;
                   state.portalCooldownMs = 450;
                   spawnParticles(p.x + p.w * 0.5, p.y + p.h * 0.5, '#38bdf8', 16, 50, 220, 0.2, 0.5);
-                  showToast('Teleported!', 'info');
                 }
               }
             } else if (tile === TILE.SPIKE) {
@@ -2819,7 +2820,6 @@
                   y: ty + TILE_SIZE - p.h,
                 };
                 spawnParticles(tx + TILE_SIZE * 0.5, ty + 16, '#fbbf24', 14, 40, 170, 0.25, 0.5);
-                showToast('Checkpoint activated!', 'warn');
               }
             } else if (tile === TILE.GOAL) {
               const goalBox = {
@@ -5614,7 +5614,13 @@
             showToast(`JSON Error: ${err.message}`, 'error');
           }
         });
-
+	if (dom.btnClearJson) {
+          dom.btnClearJson.addEventListener('click', () => {
+            dom.jsonTextarea.value = '';
+            dom.jsonTextarea.focus();
+            showToast('Cleared JSON text below', 'info');
+          });
+        }
         dom.btnResetDefaults.addEventListener('click', () => {
           localStorage.removeItem(STORAGE_KEY);
           state.physics = { ...DEFAULT_PHYSICS };
